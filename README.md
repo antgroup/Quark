@@ -1,42 +1,59 @@
 # Quark
 
-> **Stop Pretending to be Busy: A Case for Serverless Paradigms in Co-located Batch Workloads**
+Quark is a **serverless-inspired batch analytics framework** for **co-located and overcommitted cloud clusters**.  
+It rethinks the traditional Spark executor model and introduces **task-level, on-demand resource provisioning** to eliminate hidden inefficiencies in production batch workloads.
 
-Quark is a production-proven framework for improving the efficiency of **co-located batch workloads** in overcommitted cloud environments. This repository serves as the **companion page** for our paper and provides public materials related to the work.
+In large-scale production deployment at Ant Group, Quark has been used to process:
 
-> **Note**
->  
-> The production implementation of Quark is **not open-sourced at this time**.  
-> This repository is intended to host the paper, documentation, and other publicly shareable artifacts.
-
----
-
-## Paper
-
-**Title:** Stop Pretending to be Busy: A Case for Serverless Paradigms in Co-located Batch Workloads  
-**Authors:** Xiaohu Chai, Jianfeng Tan, Congsi Yuan, Bowen Yang, Hao Dai, Tongkai Yang, Chao Huang, Dong Du, Yu Chen
-
-- Paper: [PDF](./paper/quark.pdf)
-- Venue: OSDI / Operational Systems
+- **350,000+ offline query jobs daily**
+- **7,500 TB ~ 10,000 TB data per day**
+- **600,000 CPU cores deployment footprint**
+- **100,000+ CPU cores saved**
 
 ---
 
 ## Overview
 
-Modern cloud providers commonly improve cluster utilization through **overcommitment** and **workload co-location**.  
-A typical practice is to run low-priority batch analytics together with high-priority online services, while preserving online SLOs.
+Cloud providers commonly improve utilization by **co-locating low-priority batch jobs** with **high-priority online services**.  
+However, our production study shows that although overcommitment increases raw utilization, batch workloads still waste a large fraction of allocated resources.
 
-Our production study shows that although co-location increases raw utilization, existing batch systems still waste substantial resources due to a mismatch between:
+This paper identifies four major forms of idleness in co-located Spark workloads:
 
-- **coarse-grained, long-lived execution models**, and
-- **dynamic, interference-prone co-located environments**
+- **Slot Idle**: coarse-grained executor allocation wastes resources across stages
+- **Gap Idle**: stragglers caused by interference and hardware heterogeneity
+- **Start Idle**: slow startup of analytics instances
+- **Stop Idle**: delayed teardown and idle holding of resources
 
-We identify four major forms of resource idleness in production batch workloads:
+Quark addresses these inefficiencies by adopting a **serverless paradigm for batch workloads**, where resources are provisioned and released at the **task granularity** instead of the executor granularity.
 
-- **Slot Idle** — coarse-grained executors cannot adapt to stage-level resource variation
-- **Gap Idle** — hardware heterogeneity and online interference create stragglers
-- **Start Idle** — launching analytics instances is slow
-- **Stop Idle** — idle executors retain resources before being destroyed
+---
+
+## Key Ideas
+
+Quark is built around three core techniques:
+
+### 1. Scalable Resource Control
+To support massive task-level scheduling without overwhelming the control plane, Quark introduces:
+
+- **Slots Ring** for bounded task parallelism
+- **Quota Manager** for explicit overcommitment-aware resource grants
+- **Asynchronous scheduling pipeline** to decouple refill / grant / invoke operations
+
+### 2. Interference-aware Scheduler
+To mitigate stage-level stragglers caused by noisy co-location and heterogeneous machines, Quark:
+
+- normalizes node capacity using runtime interference signals
+- models effective batch capacity across nodes
+- applies a **variance-optimal scheduler** to better align task completion times
+
+### 3. Fast Task Provision
+To make per-task provisioning practical, Quark reduces cold-start overhead using:
+
+- **State Reuse via fork/vmfork**
+- **State Pre-Prepare** for task-specific states such as codegen artifacts
+- **State Lazy-Load** for non-critical runtime components
+
+---
 
 ## Why Quark?
 
@@ -51,45 +68,6 @@ This model works reasonably well on dedicated clusters, but becomes inefficient 
 Quark replaces this mismatch with a **fine-grained, elastic, task-centric execution model**, making batch workloads better suited for real cloud conditions.
 
 ---
-
----
-
-## Key Contributions
-
-Quark makes three main contributions:
-
-### 1. Characterizing inefficiency in co-located batch workloads
-We provide a production-scale study showing that a significant portion of allocated batch resources is spent in non-effective states rather than useful computation.
-
-### 2. A serverless-inspired design for batch analytics
-Quark replaces the coarse-grained executor-centric model with a fine-grained task-centric model, and introduces:
-
-- scalable resource control
-- interference-aware scheduling
-- fast task provisioning
-
-### 3. Large-scale production validation
-Quark has been deployed at production scale in Ant Group and demonstrates substantial reductions in resource waste and tail latency.
-
----
-
-## Main Findings
-
-### Production observations
-
-In our production environment:
-
-- online services use only **22.0%** of available CPU on average
-- co-located batch workloads harvest an additional **26.8%** CPU capacity
-- but only **67%** of batch-allocated resources are used for effective computation
-
-Breakdown of batch workload utilization:
-
-- **Compute:** 67%
-- **Stop Idle:** 17%
-- **Slot Idle:** 13%
-- **Gap Idle:** 2%
-- **Start Idle:** 1%
 
 ### Results
 
