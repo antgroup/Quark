@@ -134,10 +134,7 @@ The paper further reports long-term production operation over:
 This repository is intended for publicly shareable materials related to the paper, such as:
 
 - paper PDF
-- figures
-- supplementary notes
 - trace description
-- citation information
 - updates and errata
 
 > The production source code and internal deployment components are currently **not publicly available**.
