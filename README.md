@@ -28,6 +28,20 @@ Quark addresses these inefficiencies by adopting a **serverless paradigm for bat
 
 ---
 
+## Why Quark?
+
+Traditional Spark uses **long-lived executors** with fixed resource sizes.  
+This model works reasonably well on dedicated clusters, but becomes inefficient in modern co-located environments where resources are:
+
+- dynamic
+- overcommitted
+- heterogeneous
+- interference-prone
+
+Quark replaces this mismatch with a **fine-grained, elastic, task-centric execution model**, making batch workloads better suited for real cloud conditions.
+
+---
+
 ## Key Ideas
 
 Quark is built around three core techniques:
@@ -55,19 +69,7 @@ To make per-task provisioning practical, Quark reduces cold-start overhead using
 
 ---
 
-## Why Quark?
 
-Traditional Spark uses **long-lived executors** with fixed resource sizes.  
-This model works reasonably well on dedicated clusters, but becomes inefficient in modern co-located environments where resources are:
-
-- dynamic
-- overcommitted
-- heterogeneous
-- interference-prone
-
-Quark replaces this mismatch with a **fine-grained, elastic, task-centric execution model**, making batch workloads better suited for real cloud conditions.
-
----
 
 ### Results
 
