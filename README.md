@@ -2,8 +2,7 @@
 
 > **Stop Pretending to be Busy: A Case for Serverless Paradigms in Co-located Batch Workloads**
 
-Quark is a production-proven framework for improving the efficiency of **co-located batch workloads** in overcommitted cloud environments.  
-This repository serves as the **companion page** for our paper and provides public materials related to the work.
+Quark is a production-proven framework for improving the efficiency of **co-located batch workloads** in overcommitted cloud environments. This repository serves as the **companion page** for our paper and provides public materials related to the work.
 
 > **Note**
 >  
